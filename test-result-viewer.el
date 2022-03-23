@@ -4,7 +4,7 @@
 
 (defun print-testcase (testcase)
   "prints a testcase into the test-results buffer"
-    (with-current-buffer "*test-results*"
+    (with-current-buffer (get-buffer-create "*test-results*")
       (goto-char (point-max))
       (if (or (xml-get-children testcase 'failure)
 	      (xml-get-children testcase 'error))
@@ -24,6 +24,4 @@
 (defun print-and-show-testcases-in-buffer () (interactive)
  (progn (print-all-testcases-from-file test-result-viewer-reportfile)
 	(display-buffer-in-side-window (get-buffer "*test-results*") '((side . right)))))
-
-(global-set-key [f9] 'print-and-show-testcases-in-buffer)
 
