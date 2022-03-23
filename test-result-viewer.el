@@ -1,7 +1,5 @@
 (require 'xml)
 
-(get-buffer-create "*test-results*")
-
 (defun print-testcase (testcase)
   "prints a testcase into the test-results buffer"
     (with-current-buffer (get-buffer-create "*test-results*")
