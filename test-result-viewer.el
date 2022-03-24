@@ -1,8 +1,39 @@
+;;; test-result-viewer.el --- show maven test results in an emacs buffer  -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2022  David Dionis
+
+;; Author: David Dionis <david.dionis@gmail.com>
+;; Keywords: lisp, maven, test
+;; Version: 0.0.1
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; This Package can parse an xml maven test result and shows the result of
+;; each test case in an emacs buffer *test-results*. The file is specified
+;; in the variable test-result-viewer-reportfile.
+
+;;; Code:
+
 (require 'xml)
+
+(get-buffer-create "*test-results*")
 
 (defun print-testcase (testcase)
   "prints a testcase into the test-results buffer"
-    (with-current-buffer (get-buffer-create "*test-results*")
+    (with-current-buffer (get-buffer "*test-results*")
       (goto-char (point-max))
       (if (or (xml-get-children testcase 'failure)
 	      (xml-get-children testcase 'error))
@@ -23,3 +54,5 @@
  (progn (print-all-testcases-from-file test-result-viewer-reportfile)
 	(display-buffer-in-side-window (get-buffer "*test-results*") '((side . right)))))
 
+(provide 'test-result-viewer)
+;;; test-result-viewer.el ends here
