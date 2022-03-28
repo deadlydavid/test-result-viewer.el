@@ -54,5 +54,21 @@
  (progn (print-all-testcases-from-file test-result-viewer-reportfile)
 	(display-buffer-in-side-window (get-buffer "*test-results*") '((side . right)))))
 
+(defun show-test-results (process signal)
+  (when (memq (process-status process) '(exit signal))
+    (print-and-show-testcases-in-buffer)
+    (shell-command-sentinel process signal)))
+
+(defun execute-project-tests () (interactive)
+       (let* ((output-buffer (get-buffer-create "*test-runner*"))
+	      (default-directory (projectile-project-root))
+	      (proc (progn (with-current-buffer "*test-results*"
+			     (erase-buffer) (insert "running tests..."))
+			   (async-shell-command "mvn -B test" output-buffer 0)
+			   (get-buffer-process output-buffer))))
+	 (if (process-live-p proc)
+	     (set-process-sentinel proc #'show-test-results)
+	   (message "No process running"))))
+
 (provide 'test-result-viewer)
 ;;; test-result-viewer.el ends here
