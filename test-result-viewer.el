@@ -29,11 +29,13 @@
 
 (require 'xml)
 
-(get-buffer-create "*test-results*")
+(setq test-result-viewer-buffer-name "*test-results*")
+
+(get-buffer-create test-result-viewer-buffer-name)
 
 (defun print-testcase (testcase)
   "prints a testcase into the test-results buffer"
-    (with-current-buffer (get-buffer "*test-results*")
+    (with-current-buffer (get-buffer test-result-viewer-buffer-name)
       (goto-char (point-max))
       (if (or (xml-get-children testcase 'failure)
 	      (xml-get-children testcase 'error))
@@ -50,7 +52,7 @@
 
 (defun print-all-testcases-from-file (filename)
   "prints all testcases from the report file into the buffer *test-results*"
-  (progn (with-current-buffer (get-buffer "*test-results*") (insert (concat filename "\n")))
+  (progn (with-current-buffer (get-buffer test-result-viewer-buffer-name) (insert (concat filename "\n")))
 	 (print-all-testcases (xml-get-children (assq 'testsuite (xml-parse-file filename)) 'testcase))))
 
 (defun list-files-in-test-folder () (interactive)
@@ -58,7 +60,7 @@
 
 (defun print-and-show-testcases-in-buffer () (interactive)
  (progn (dolist (elt (list-files-in-test-folder)) (print-all-testcases-from-file elt))
-	(display-buffer-in-side-window (get-buffer "*test-results*") '((side . right)))))
+	(display-buffer-in-side-window (get-buffer test-result-viewer-buffer-name) '((side . right)))))
 
 (defun show-test-results (process signal)
   (when (memq (process-status process) '(exit signal))
@@ -68,7 +70,7 @@
 (defun execute-project-tests () (interactive)
        (let* ((output-buffer (get-buffer-create "*test-runner*"))
 	      (default-directory (projectile-project-root))
-	      (proc (progn (with-current-buffer "*test-results*"
+	      (proc (progn (with-current-buffer test-result-viewer-buffer-name
 			     (erase-buffer) (insert (concat "running tests... - "
 							    (format-time-string "%H:%M:%S"
 										(current-time)) "\n")))
