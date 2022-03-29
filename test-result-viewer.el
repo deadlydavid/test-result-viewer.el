@@ -39,9 +39,9 @@
       (goto-char (point-max))
       (if (or (xml-get-children testcase 'failure)
 	      (xml-get-children testcase 'error))
-	  (insert "[x] ") (insert (propertize "[o] "
-					      'font-lock-face
-					      '(:foreground "forest green"))))
+	  (insert "[ FAIL ] ") (insert (propertize "[ OK ]  "
+						 'font-lock-face
+						 '(:foreground "forest green"))))
       (insert (substring (prin1-to-string (dom-attr testcase 'name)) 1 -1)) (insert " (")
       (insert (substring (prin1-to-string (dom-attr testcase 'time)) 1 -1)) (insert " sec)\n")))
 
