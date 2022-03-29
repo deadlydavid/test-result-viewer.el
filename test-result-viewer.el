@@ -37,21 +37,27 @@
       (goto-char (point-max))
       (if (or (xml-get-children testcase 'failure)
 	      (xml-get-children testcase 'error))
-	  (insert "[x] ") (insert "[o] "))
+	  (insert "[x] ") (insert (propertize "[o] "
+					      'font-lock-face
+					      '(:foreground "forest green"))))
       (insert (substring (prin1-to-string (dom-attr testcase 'name)) 1 -1)) (insert " (")
       (insert (substring (prin1-to-string (dom-attr testcase 'time)) 1 -1)) (insert " sec)\n")))
 
 (defun print-all-testcases (list-of-testcases)
   "prints all testcases contained in the given list"
-  (progn (with-current-buffer "*test-results*" (erase-buffer))
+  (progn ;(with-current-buffer "*test-results*" (erase-buffer))
 	 (let (value) (dolist (elt list-of-testcases) (print-testcase elt)))))
 
 (defun print-all-testcases-from-file (filename)
   "prints all testcases from the report file into the buffer *test-results*"
-  (print-all-testcases (xml-get-children (assq 'testsuite (xml-parse-file filename)) 'testcase)))
+  (progn (with-current-buffer (get-buffer "*test-results*") (insert (concat filename "\n")))
+	 (print-all-testcases (xml-get-children (assq 'testsuite (xml-parse-file filename)) 'testcase))))
+
+(defun list-files-in-test-folder () (interactive)
+       (directory-files-recursively (projectile-project-root) "TEST-.*\.xml"))
 
 (defun print-and-show-testcases-in-buffer () (interactive)
- (progn (print-all-testcases-from-file test-result-viewer-reportfile)
+ (progn (dolist (elt (list-files-in-test-folder)) (print-all-testcases-from-file elt))
 	(display-buffer-in-side-window (get-buffer "*test-results*") '((side . right)))))
 
 (defun show-test-results (process signal)
@@ -63,7 +69,9 @@
        (let* ((output-buffer (get-buffer-create "*test-runner*"))
 	      (default-directory (projectile-project-root))
 	      (proc (progn (with-current-buffer "*test-results*"
-			     (erase-buffer) (insert "running tests..."))
+			     (erase-buffer) (insert (concat "running tests... - "
+							    (format-time-string "%H:%M:%S"
+										(current-time)) "\n")))
 			   (async-shell-command "mvn -B test" output-buffer 0)
 			   (get-buffer-process output-buffer))))
 	 (if (process-live-p proc)
